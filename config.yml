@@ -1,0 +1,51 @@
+---
+- name: Configure GNS3 Router
+  hosts: gns3_router
+  connection: network_cli
+  gather_facts: no
+  vars:
+    router_hostname: R1_Mallari
+    router_enable_password: class
+    router_banner: "Authorized access only!"
+    router_ip_address: 192.168.56.101
+    router_subnet_mask: 255.255.255.0
+
+  tasks:
+    - name: Configure hostname
+      ios_config:
+        lines:
+          - "hostname {{ router_hostname }}"
+
+    - name: Enable service password-encryption
+      ios_config:
+        lines:
+          - "service password-encryption"
+
+    - name: Configure console password
+      ios_config:
+        lines:
+          - "line console 0"
+          - "password cisco"
+          - "login"
+
+    - name: Configure enable password
+      ios_config:
+        lines:
+          - "enable password {{ router_enable_password }}"
+
+    - name: Configure banner
+      ios_config:
+        lines:
+          - "banner motd # {{ router_banner }} #"
+
+    - name: Configure IP address on interface f0/0
+      ios_config:
+        lines:
+          - "interface f0/0"
+          - "ip address {{ router_ip_address }} {{ router_subnet_mask }}"
+          - "no shutdown"
+
+    - name: Save configuration
+      ios_config:
+        lines:
+          - "write memory"
